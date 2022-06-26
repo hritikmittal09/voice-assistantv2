@@ -20,7 +20,8 @@ import urllib
 import sys
 from tkinter import *
 import threading
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk,ImageSequence
+import time
 
 
 sleep_zera = 1
@@ -57,7 +58,7 @@ def openfiles():
     speak("which file")
     filename= str (takecommand()).lower()
     if filename in all_files.keys():
-        speak("opening file")
+        speak(f"opening {filename}")
         os.startfile(all_files[filename])
         return
 def news():
@@ -116,6 +117,7 @@ def takecommand():
             audio = r.listen(surcoe,timeout=10,phrase_time_limit=5)
             print("recongnizing...")
             graphic_terminal.insert(END, "recongnizing...\n")
+            graphic_terminal.delete(END)
             quary = r.recognize_google(audio,language="en-in")
             print(f"user said {quary}")
             graphic_terminal.insert(END, f"user said : {quary}\n")
@@ -160,8 +162,8 @@ def how_to_do():
     speak("what you want to search")
     search = takecommand()
     data = search_wikihow(search,1)
-    data[0].print()
-    graphic_terminal.insert(END,str(data[0].print) )
+    #data[0].print()
+    graphic_terminal.insert(END,str(data[0].summary) )
     speak(data[0].summary)
     speak("thanks")
     
@@ -270,7 +272,30 @@ def zera_backend():
             peformtask()
         elif "shutdown" in statzera:
             speak("thanks for using me have a nice day")
+            quit()
             break
+
+
+
+
+def animation():
+    global i
+    global bg
+    try:
+
+        bg = Image.open("B5.gif")
+        background_lebal=Label(zera_window)
+        background_lebal.place(x=0,y=0)
+        for i in ImageSequence.Iterator(bg):
+            i=i.resize((320,330))
+            i= ImageTk.PhotoImage(i)
+            background_lebal.config(image=i)
+            zera_window.update()
+            time.sleep(0.06)
+        zera_window.after(0,animation)
+    
+    except Exception as e:
+        exit()
 
 
 
@@ -279,15 +304,18 @@ def zera_backend():
 #zera gui
 zera_window = Tk()
 zera_window.geometry("500x500")
+zera_window.config(background="black")
 
-bg = PhotoImage(file = "b.png")
-background_lebal=Label(image=bg)
-background_lebal.place(x=0,y=0,relwidth=1)
+
+
+zeranimation = threading.Thread(target=animation)
+
+zeranimation.start() 
 graphic_terminal = Text(width=40,height=10,background="black", foreground="White")
 #graphic_terminal.insert(END, "hritik")
 graphic_terminal.pack(side="bottom")
 date_time=Text(background="black", foreground="White",height=4,width=20)
-date_time.pack(side="top",anchor="nw")
+date_time.pack(side="top",anchor="ne")
 date_time.insert(END,f"Date - { datetime. datetime.today().strftime('%Y-%m-%d')}\n" )
 date_time.insert(END, "      WELCOME")
 zera_window.title('zera vitual assistant')

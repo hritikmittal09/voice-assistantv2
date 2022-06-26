@@ -18,9 +18,7 @@ import webbrowser
 import pywhatkit
 import urllib 
 import sys
-from tkinter import *
-import threading
-from PIL import Image, ImageTk
+
 
 
 sleep_zera = 1
@@ -29,10 +27,8 @@ sleep_zera = 1
 
 def is_internet():
     speak("checking internet connection")
-    print("checking internet connection")
     time.sleep(1)
     speak("internet is connected we are  online how may i help you")
-    print("internet is connected")
     try:
         checkIN = urllib.request.urlopen("https://www.google.com",timeout=1)
 
@@ -46,9 +42,6 @@ def search():
     
     pywhatkit.search(mysearch)
     return
-    
-
-
 
 
 #createing data base for storing diloug for assistant and storing file path 
@@ -86,10 +79,8 @@ engine.setProperty("voice",voices[1].id)
 def speak(audio):
     engine.say(audio)
     engine.runAndWait()
-
 def wish():
     print(" hollo i am zera")
-    graphic_terminal.insert(END, F"hello i am zera\n")
     hour = datetime.datetime.now().hour
     if hour > 0 and hour <12:
         speak("good morning")
@@ -107,7 +98,6 @@ def takecommand():
     r= sr.Recognizer()
     with sr.Microphone() as surcoe:
         print("listening...")
-        graphic_terminal.insert(END,"listining...\n" )
         r.pause_threshold=1
         global sleep_zera
         
@@ -115,10 +105,8 @@ def takecommand():
         try:
             audio = r.listen(surcoe,timeout=10,phrase_time_limit=5)
             print("recongnizing...")
-            graphic_terminal.insert(END, "recongnizing...\n")
             quary = r.recognize_google(audio,language="en-in")
             print(f"user said {quary}")
-            graphic_terminal.insert(END, f"user said : {quary}\n")
             return quary
         except Exception as e:
             
@@ -140,10 +128,7 @@ def read_pdf():
     pdf_pagenum = pdfREader.getPage(pe)
     text= pdf_pagenum.extractText()
     print(text)
-    graphic_terminal.insert(END, str(text))
     speak(text)
-
-
 def temprature():
     
     
@@ -153,7 +138,6 @@ def temprature():
     data = BeautifulSoup(r.text,"html.parser")
     temp=data.find("div", class_="BNeawe").text
     speak(f"tempuratre in city is {temp}")
-    graphic_terminal.insert(END, str(temp))
     print(temp)
 
 def how_to_do():
@@ -161,7 +145,6 @@ def how_to_do():
     search = takecommand()
     data = search_wikihow(search,1)
     data[0].print()
-    graphic_terminal.insert(END,str(data[0].print) )
     speak(data[0].summary)
     speak("thanks")
     
@@ -199,16 +182,12 @@ def peformtask():
             speak(f"your ip address is {ip} ")
         #wikipidia search
         if "wikipedia" in my_command:
-            try:
-                speak("serching online")
-                my_command= my_command.replace("wikipedia","")
-                result = wikipedia.summary(my_command, sentences=2)
-                speak("here is some result")
-                print(result)
-                graphic_terminal.insert(END, str(result))
-                speak(result)
-            except Exception as e:
-                speak("can't able to search try again")    
+            speak("serching online")
+            my_command= my_command.replace("wikipedia","")
+            result = wikipedia.summary(my_command, sentences=2)
+            speak("here is some result")
+            print(result)
+            speak(result)
         
         if "open file" in my_command:
             openfiles()
@@ -234,68 +213,20 @@ def peformtask():
 
         if "search" in my_command:
             search()
-        if "restart" in my_command:
-            speak("do you want to restart computer ? ")
-            restartcheck= str(takecommand()).lower()
-            if "yes" in restartcheck:
-                os.system("shutdown /r /t 30")
-                speak("restaring in 30 seconds")
-                print("restarting in 30 secs...")
-                sys.exit()
-            else:
-                speak("sure")
-                continue
-        if "shutdown" in my_command:
-            speak("do you want  to shutdown computer ? ")
-            restartcheck= str(takecommand()).lower()
-            if "yes" in restartcheck:
-                os.system("shutdown /s /t 30")
-                speak("shutdown in 30 seconds")
-                print("restarting in 30 seconds")
-                sys.exit()
-            else:
-                speak("sure")
-                continue        
-                
-          
-def zera_backend():
-    wish()
-    is_internet()
-    while True:
+        
+wish()
+is_internet()  
 
-        statzera= str(takecommand()).lower()
-        if "wake up" in statzera:
-            sleep_zera = 0
-            speak("i am at your service how may help you")
-            peformtask()
-        elif "shutdown" in statzera:
-            speak("thanks for using me have a nice day")
-            break
-
-
-
-
-
-#zera gui
-zera_window = Tk()
-zera_window.geometry("500x500")
-
-bg = PhotoImage(file = "b.png")
-background_lebal=Label(image=bg)
-background_lebal.place(x=0,y=0,relwidth=1)
-graphic_terminal = Text(width=40,height=10,background="black", foreground="White")
-#graphic_terminal.insert(END, "hritik")
-graphic_terminal.pack(side="bottom")
-date_time=Text(background="black", foreground="White",height=4,width=20)
-date_time.pack(side="top",anchor="nw")
-date_time.insert(END,f"Date - { datetime. datetime.today().strftime('%Y-%m-%d')}\n" )
-date_time.insert(END, "      WELCOME")
-zera_window.title('zera vitual assistant')
-t1= threading.Thread(target=zera_backend)
-
-
-t1.start()
-
-zera_window.mainloop()
+while True:
+    
+    statzera= str(takecommand()).lower()
+    if "wake up" in statzera:
+        sleep_zera = 0
+        speak("i am at your service how may help you")
+        peformtask()
+    elif "shutdown" in statzera:
+        speak("thanks for using me have a nice day")
+        break
+    
     
 
