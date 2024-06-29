@@ -22,7 +22,12 @@ from tkinter import *
 import threading
 from PIL import Image, ImageTk,ImageSequence
 import time
-
+import platform
+import cpuinfo
+import psutil
+from newsapi import NewsApiClient
+import speedtest
+import requests
 
 sleep_zera = 1
 
@@ -61,8 +66,9 @@ def openfiles():
         speak(f"opening {filename}")
         os.startfile(all_files[filename])
         return
+
 def news():
-    my_news= newsapi.NewsApiClient("56dc8aa50892475eaba5bb26261bd912")
+    my_news= NewsApiClient("56dc8aa50892475eaba5bb26261bd912")
     my_news= my_news.get_top_headlines()
     articals = my_news["articles"]
     head=[]
@@ -82,7 +88,7 @@ def news():
 engine=pyttsx3.init("sapi5")
 voices=engine.getProperty("voices")
 #print(voices[0].id)
-engine.setProperty("voice",voices[1].id)
+engine.setProperty("voice",voices[0].id)
 
 def speak(audio):
     engine.say(audio)
@@ -114,7 +120,7 @@ def takecommand():
         
         
         try:
-            audio = r.listen(surcoe,timeout=10,phrase_time_limit=5)
+            audio = r.listen(surcoe,timeout=5,phrase_time_limit=5)
             print("recongnizing...")
             graphic_terminal.insert(END, "recongnizing...\n")
             graphic_terminal.delete(END)
@@ -124,8 +130,9 @@ def takecommand():
             return quary
         except Exception as e:
             
-            if sleep_zera == 0 :
+            if sleep_zera == 1:
                 speak("say that again")
+ 
                 
 
 
@@ -147,17 +154,21 @@ def read_pdf():
 
 
 def temprature():
-    
-    
-    url = "https://www.google.com/search?q=tempratare+in+delhi&rlz=1C1CHBD_enIN980IN980&oq=tempratare+in+delhi&aqs=chrome..69i57j33i160.43381j1j15&sourceid=chrome&ie=UTF-8"
-    
-    r=get(url)
-    data = BeautifulSoup(r.text,"html.parser")
-    temp=data.find("div", class_="BNeawe").text
-    speak(f"tempuratre in city is {temp}")
-    graphic_terminal.insert(END, str(temp))
-    print(temp)
+    try:
+        speak("please tell me city name ")
+        city = takecommand()
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid=70c061742bd85cb1bcdd531809e23060"
+        print(city)
+        r = requests.get(url)
+        weather = (r.json())
+        temp =weather["main"]["temp"]
+        discription = weather["weather"][0]["description"]
+        speak(f"temprature in {city} is {temp} degree celcius {discription}")
+    except Exception as e:
+        speak("something went wrong ...")    
 
+    
+    
 def how_to_do():
     speak("what you want to search")
     search = takecommand()
@@ -221,7 +232,7 @@ def peformtask():
         if "sleep" in my_command:
             global sleep_zera
             sleep_zera = 1
-            speak("i am going to sleep you can call me any time by saying wake up")
+            speak("i am going to sleep you can call me any time by saying the password")
             break
         if "joke" in my_command:
             joke =  pyjokes.get_joke()
@@ -266,9 +277,13 @@ def zera_backend():
     while True:
 
         statzera= str(takecommand()).lower()
-        if "wake up" in statzera:
+        password =open("./password.txt","r")
+        x = password.read()
+        password.close()
+
+        if x in statzera:
             sleep_zera = 0
-            speak("i am at your service how may help you")
+            speak("i am at your service how may help you          ")
             peformtask()
         elif "shutdown" in statzera:
             speak("thanks for using me have a nice day")
@@ -287,7 +302,7 @@ def animation():
         background_lebal=Label(zera_window)
         background_lebal.place(x=0,y=0)
         for i in ImageSequence.Iterator(bg):
-            i=i.resize((320,330))
+            i=i.resize((420,730))
             i= ImageTk.PhotoImage(i)
             background_lebal.config(image=i)
             zera_window.update()
@@ -303,7 +318,12 @@ def animation():
 
 #zera gui
 zera_window = Tk()
+bgImage = Image.open("bg2.jfif")
+set_bg_imge = ImageTk.PhotoImage(bgImage)
+bg_lebal = Label(image=set_bg_imge)
+bg_lebal.place(x=0 ,y=0)
 zera_window.geometry("500x500")
+zera_window.state("zoomed")
 zera_window.config(background="black")
 
 
@@ -311,9 +331,18 @@ zera_window.config(background="black")
 zeranimation = threading.Thread(target=animation)
 
 zeranimation.start() 
-graphic_terminal = Text(width=40,height=10,background="black", foreground="White")
+graphic_terminal = Text(width=100,height=10,background="black", foreground="White")
 #graphic_terminal.insert(END, "hritik")
 graphic_terminal.pack(side="bottom")
+cpu_usage_terminal = Text(width=40,height=40,background="black", foreground="White")
+
+
+cpu_usage_terminal.pack(side="right",anchor="sw")
+cpu_usage_terminal.insert(END, "CPU USAGE\n")
+cpu_usage_terminal.insert(END, "\n\n")
+cpu_usage_terminal.insert(END, platform.processor()+"\n"+ "CPU percentage = "+ str(psutil.cpu_percent()) )
+#cpu_usage_terminal.insert(END, f"uploading apeed- {speedtest.Speedtest().upload()}\n downloading speed {speedtest.Speedtest().download()} ")
+
 date_time=Text(background="black", foreground="White",height=4,width=20)
 date_time.pack(side="top",anchor="ne")
 date_time.insert(END,f"Date - { datetime. datetime.today().strftime('%Y-%m-%d')}\n" )
@@ -324,6 +353,6 @@ t1= threading.Thread(target=zera_backend)
 
 t1.start()
 
-zera_window.mainloop()
+zera_window.mainloop()           
     
 
